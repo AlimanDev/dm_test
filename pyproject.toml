@@ -2,7 +2,7 @@
 name = "dashamail-project"
 version = "0.1.0"
 description = ""
-authors = ["alimandev <aliman@ptolemay.com>"]
+authors = ["alimandev <alimandeveloper@gmail.com>"]
 readme = "README.md"
 packages = [{include = "dashamail_project"}]
 

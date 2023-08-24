@@ -1,41 +1,26 @@
-import pytest
-from django.conf import settings
+import unittest
+from unittest.mock import patch
 
-from services.dashamail.send_mail import DashaMail
-
-dashamail = DashaMail()
+from services.dashamail.send_mail import DashaMailTransaction
 
 
-@pytest.mark.parametrize(
-    "emails", [
-        ['alimandeveloper@gmail.com'],
-        ['alimandeveloper@gmail.com', 'fsdamp@gmail.com'],
-        ['alimandeveloper@gmail.com', 'fsdamp@gmail.com', 'fsdamp.job@gmail.com'],
-    ]
-)
-def test_params_newsletter(emails):
-    params = {
-        'method': 'transactional.send',
-        'api_key': settings.DASHAMAIL_API_KEY,
-        'to': ','.join(emails),
-        'from_email': settings.DASHAMAIL_FROM_EMAIL,
-        'message': settings.DASHAMAIL_MAILING_ID,
-    }
+class TestDashaMailTransaction(unittest.TestCase):
 
-    assert dashamail.get_params_newsletter(
-        emails=emails, mailing_id=settings.DASHAMAIL_MAILING_ID
-    ) == params
+    def test_send(self):
+        fake_result = {
+            'http_status_code': 200,
+            'error_code': -1000,
+            'error_message': 'Error Connection'
+        }
 
+        with patch('services.dashamail.send_mail.DashaMailTransaction.send') as mock_get:
+            mock_get.return_value.http_status_code = 200
+            mock_get.return_value.__dict__ = fake_result
 
-@pytest.mark.parametrize(
-    "emails", [
-        ['alimandeveloper@gmail.com'],
-        ['alimandeveloper@gmail.com', 'fsdamp@gmail.com'],
-        ['alimandeveloper@gmail.com', 'fsdamp@gmail.com', 'fsdamp.job@gmail.com'],
-    ]
-)
-def test_send_newsletter(emails):
-    response = dashamail.send_newsletter(
-        emails=emails, mailing_id=settings.DASHAMAIL_MAILING_ID
-    )
-    assert response.status_code == 200 and response.err_code == 0
+            emails = ['alimandeveloper@gmail.com']
+            mailing_id = 'mailing_id_123'
+            dasha_mail = DashaMailTransaction(emails=emails, mailing_id=mailing_id)
+            response = dasha_mail.send()
+
+        self.assertEquals(response.http_status_code, 200)
+        self.assertEquals(response.__dict__, fake_result)

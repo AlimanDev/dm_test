@@ -1,18 +1,38 @@
 class DashaMailResponse:
-    status_code: int
-    err_code: int
-    text: str
-    _type: str
-    transaction_id: str
+    http_status_code: int
+    error_code: int
+    error_message: str
+    transaction_id: str = ''
 
-    def __init__(self, result):
-        self.status_code = result.status_code
-        if self.status_code == 200:
-            resp_data = result.json()
-            response = resp_data.get('response')
-            msg = response.get('msg')
-            data = response.get('data')
-            self.err_code = msg.get('err_code')
-            self.text = msg.get('text')
-            self._type = msg.get('type')
-            self.transaction_id = data.get('transaction_id')
+    def __init__(self, response):
+
+        if isinstance(response, str):
+            self.error_other(response)
+        else:
+            self.http_status_code = response.status_code
+            response_json = response.json()
+            response_type = response_json['response']['msg']['type']
+            if self.http_status_code == 200:
+                if response_type == 'message':
+                    self.success(response_json)
+                elif response_type == 'error':
+                    self.error(response_json)
+            else:
+                self.error(response_json)
+
+    def success(self, data):
+        self.error_code = data['response']['msg']['err_code']
+        self.error_message = data['response']['msg']['text']
+        self.transaction_id = data['response']['data']['transaction_id']
+        print(self.__dict__)
+
+    def error(self, data):
+        self.error_code = data['response']['msg']['err_code']
+        self.error_message = data['response']['msg']['text']
+        print(self.__dict__)
+
+    def error_other(self, result):
+        self.http_status_code = 400
+        self.error_code = -1000
+        self.error_message = result
+        print(self.__dict__)
