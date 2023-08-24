@@ -1,5 +1,4 @@
 class DashaMailResponse:
-    http_status_code: int
     error_code: int
     error_message: str
     transaction_id: str = ''
@@ -9,16 +8,14 @@ class DashaMailResponse:
         if isinstance(response, str):
             self.error_other(response)
         else:
-            self.http_status_code = response.status_code
-            response_json = response.json()
-            response_type = response_json['response']['msg']['type']
-            if self.http_status_code == 200:
-                if response_type == 'message':
-                    self.success(response_json)
-                elif response_type == 'error':
-                    self.error(response_json)
+            data = response.json()
+            response_type = data['response']['msg']['type']
+            if response_type == 'message':
+                self.success(data)
+            elif response_type == 'error':
+                self.error(data)
             else:
-                self.error(response_json)
+                self.error(data)
 
     def success(self, data):
         self.error_code = data['response']['msg']['err_code']
@@ -32,7 +29,6 @@ class DashaMailResponse:
         print(self.__dict__)
 
     def error_other(self, result):
-        self.http_status_code = 400
         self.error_code = -1000
         self.error_message = result
         print(self.__dict__)
