@@ -5,7 +5,9 @@ from django.conf import settings
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-from services.dashamail.schemas import DashaMailResponse
+
+class DashaMailTransactionException(Exception):
+    """An DashaMailTransaction error occurred."""
 
 
 class DashaMailTransaction:
@@ -26,7 +28,7 @@ class DashaMailTransaction:
         self.emails = emails
         self.mailing_id = mailing_id
 
-    def send(self) -> DashaMailResponse:
+    def send(self) -> dict[str, str]:
         """Отправляет рассылку по указанным почтовым адресам."""
 
         retry_strategy = Retry(
@@ -41,15 +43,16 @@ class DashaMailTransaction:
 
         try:
             response = session.post(url=self.API, params=self.get_params())
-            result = response
-        except requests.exceptions.ConnectionError as err_msg:
-            result = str(err_msg)
-        except requests.exceptions.Timeout as err_msg:
-            result = str(err_msg)
-        except requests.exceptions.RequestException as err_msg:
-            result = str(err_msg)
-
-        return DashaMailResponse(response=result)
+            response.raise_for_status()
+            data = response.json()
+            response_type = data['response']['msg']['type']
+            if response_type == 'message':
+                transaction_id = data['response']['data']['transaction_id']
+                return {'transaction_id': transaction_id}
+            else:
+                raise DashaMailTransactionException(data['response']['msg']['text'])
+        except (requests.exceptions.RequestException, requests.exceptions.JSONDecodeError, KeyError) as e:
+            raise DashaMailTransactionException(e)
 
     def get_params(self) -> Dict[str, str]:
         """Формирует параметры запроса рассылки."""
