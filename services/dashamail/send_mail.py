@@ -11,7 +11,7 @@ from services.dashamail.exceptions import DashaMailTransactionException
 class DashaMailTransaction:
     API = 'https://api.dashamail.com/'
     API_KEY = settings.DASHAMAIL_API_KEY
-    FROM_EMAIL = 'asd'  # settings.DASHAMAIL_FROM_EMAIL
+    FROM_EMAIL = settings.DASHAMAIL_FROM_EMAIL
     METHOD = 'transactional.send'
 
     emails: List[str]

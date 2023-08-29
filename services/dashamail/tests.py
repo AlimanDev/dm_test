@@ -35,8 +35,6 @@ class TestDashaMailTransaction(unittest.TestCase):
         fake_result_error = {
             'response': {
                 'msg': {'err_code': 1, 'text': 'Неверный логин и(или) пароль', 'type': 'error'},
-                # 'msg': {'err_code': 6, 'text': 'Некорректный email-адрес', 'type': 'error'},
-                # 'msg': {'err_code': 999, 'text': 'Неизвестный метод', 'type': 'error'},
                 'data': None
             }
         }
