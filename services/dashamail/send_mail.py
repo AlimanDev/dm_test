@@ -5,9 +5,7 @@ from django.conf import settings
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
-class DashaMailTransactionException(Exception):
-    """An DashaMailTransaction error occurred."""
+from services.dashamail.exceptions import DashaMailTransactionException
 
 
 class DashaMailTransaction:
@@ -43,6 +41,7 @@ class DashaMailTransaction:
 
         try:
             response = session.post(url=self.API, params=self.get_params())
+            print(f'status_code: {response.status_code}')
             response.raise_for_status()
             data = response.json()
             response_type = data['response']['msg']['type']
@@ -53,6 +52,7 @@ class DashaMailTransaction:
                 raise DashaMailTransactionException(data['response']['msg']['text'])
         except (requests.exceptions.RequestException, requests.exceptions.JSONDecodeError, KeyError) as e:
             raise DashaMailTransactionException(e)
+            # return response
 
     def get_params(self) -> Dict[str, str]:
         """Формирует параметры запроса рассылки."""
