@@ -45,9 +45,8 @@ class TestDashaMailTransaction(unittest.TestCase):
 
         self.assertRaises(DashaMailTransactionException, self.dasha_mail.send)
 
-    @patch('services.dashamail.send_mail.requests')
-    def test_send_raise(self, mock_requests):
-        mock_requests.post.side_effect = DashaMailTransactionException
-        with self.assertRaises(DashaMailTransactionException):
-            self.dasha_mail.send()
-            mock_requests.post.assert_called_once()
+    @patch.object(Session, 'post')
+    def test_send_error(self, mock_post):
+        for exception in (requests.exceptions.RequestException, requests.exceptions.InvalidJSONError, KeyError):
+            mock_post.return_value.raise_for_status.side_effect = exception
+            self.assertRaises(DashaMailTransactionException, self.dasha_mail.send)

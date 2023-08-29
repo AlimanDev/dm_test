@@ -11,7 +11,7 @@ from services.dashamail.exceptions import DashaMailTransactionException
 class DashaMailTransaction:
     API = 'https://api.dashamail.com/'
     API_KEY = settings.DASHAMAIL_API_KEY
-    FROM_EMAIL = settings.DASHAMAIL_FROM_EMAIL
+    FROM_EMAIL = 'asd'  # settings.DASHAMAIL_FROM_EMAIL
     METHOD = 'transactional.send'
 
     emails: List[str]
@@ -52,7 +52,6 @@ class DashaMailTransaction:
                 raise DashaMailTransactionException(data['response']['msg']['text'])
         except (requests.exceptions.RequestException, requests.exceptions.JSONDecodeError, KeyError) as e:
             raise DashaMailTransactionException(e)
-            # return response
 
     def get_params(self) -> Dict[str, str]:
         """Формирует параметры запроса рассылки."""
