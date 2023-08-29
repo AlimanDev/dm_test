@@ -41,7 +41,6 @@ class DashaMailTransaction:
 
         try:
             response = session.post(url=self.API, params=self.get_params())
-            print(f'status_code: {response.status_code}')
             response.raise_for_status()
             data = response.json()
             response_type = data['response']['msg']['type']
